@@ -131,6 +131,7 @@ void CubeRenderer::CreateDeviceResources()
 
 	createCubeTask.then([this] () {
 		m_loadingComplete = true;
+		Update(0.0, 0.0);
 	});
 }
 
@@ -187,7 +188,7 @@ void CubeRenderer::Render()
 			m_depthStencilView.Get()
 			);
 
-	 	XMStoreFloat4x4(&m_constantBufferData.model, cube->m_modelMatrix);
+	 	XMStoreFloat4x4(&m_constantBufferData.model, cube->GetModelMatrix());
  
 		m_d3dContext->UpdateSubresource(
 			m_constantBuffer.Get(),
@@ -198,7 +199,23 @@ void CubeRenderer::Render()
 			0
 			);
 
-		cube->RenderBuffers(m_d3dContext);
+		UINT stride = sizeof(VertexPositionColor);
+		UINT offset = 0;
+		m_d3dContext->IASetVertexBuffers(
+			0,
+			1,
+			m_vertexBuffer.GetAddressOf(),
+			&stride,
+			&offset
+			);
+
+		m_d3dContext->IASetIndexBuffer(
+			m_indexBuffer.Get(),
+			DXGI_FORMAT_R16_UINT,
+			0
+			);
+
+		m_d3dContext->IASetPrimitiveTopology(D3D11_PRIMITIVE_TOPOLOGY_TRIANGLELIST);
 
 		m_d3dContext->IASetInputLayout(m_inputLayout.Get());
 
@@ -221,7 +238,7 @@ void CubeRenderer::Render()
 			);
 
 		m_d3dContext->DrawIndexed(
-			cube->GetIndexCount(),
+			m_indexCount,
 			0,
 			0
 			);
@@ -233,7 +250,6 @@ Cube^ CubeRenderer::CreateCube()
 {
 	auto cube = ref new Cube();
 	m_cubes.push_back(cube);
-	cube->Create(m_d3dDevice);
 	return cube;
 }
 

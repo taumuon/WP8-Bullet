@@ -72,7 +72,6 @@ void WP8_Bullet::Run()
 			m_level->Update();
 
 			CoreWindow::GetForCurrentThread()->Dispatcher->ProcessEvents(CoreProcessEventsOption::ProcessAllIfPresent);
-			m_renderer->Update(timer->Total, timer->Delta);
 			m_renderer->Render();
 			m_renderer->Present(); // This call is synchronized to the display frame rate.
 		}
